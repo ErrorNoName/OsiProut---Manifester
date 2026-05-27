@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="fr" id="html-root">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="page-title">OsiProut Manifester — Télécharger</title>
+  <meta name="description" data-i18n-attr="content" data-i18n="page-desc" content="Télécharger OsiProut Manifester — Gestionnaire de manifests Steam. Installateur NSIS, installation rapide avec mise à jour automatique intégrée.">
+  <!-- Mettre à jour cette URL à chaque nouvelle release GitHub → le logiciel la détecte automatiquement -->
+  <!-- MISE À JOUR : changer cette URL + les href des boutons à chaque nouvelle release -->
+  <meta name="download-url" content="https://github.com/ErrorNoName/OsiProut---Manifester/releases/download/installer/OsiProut-Manifester-Setup.exe">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+
+  <style>
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Tokens ── */
+    :root {
+      --bg-0:     #090911;
+      --bg-1:     rgba(14,14,23,0.82);
+      --bg-2:     rgba(19,19,30,0.80);
+      --bg-3:     rgba(25,25,38,0.90);
+      --tx-1:     #e8e8f4;
+      --tx-2:     #9898b8;
+      --tx-3:     #5a5a78;
+      --accent:   #7c5cbf;
+      --accent-h: #956ee0;
+      --accent-g: rgba(124,92,191,0.15);
+      --border:   rgba(255,255,255,0.055);
+      --border-h: rgba(124,92,191,0.35);
+      --radius:   10px;
+      --shadow:   0 8px 32px rgba(0,0,0,0.55);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-0);
+      color: var(--tx-1);
+      font-family: 'Syne', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar              { width: 5px; background: transparent; }
+    ::-webkit-scrollbar-thumb        { background: rgba(124,92,191,0.25); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover  { background: rgba(124,92,191,0.5); }
+
+    /* ── WebGL Canvas ── */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── Canvas overlay ── */
+    #bg-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(9,9,17,0.68);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* ── Grid lines ── */
+    #bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,92,191,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,92,191,0.035) 1px, transparent 1px);
+      background-size: 56px 56px;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* ── Content wrapper ── */
+    #page {
+      position: relative;
+      z-index: 10;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ══════════════════════════════════════
+       NAV
+    ══════════════════════════════════════ */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(9,9,17,0.88);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--tx-1);
+    }
+
+    .nav-logo-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: radial-gradient(circle at 40% 35%, rgba(124,92,191,0.30), rgba(9,9,17,0.9));
+      border: 1px solid rgba(124,92,191,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 14px rgba(124,92,191,0.20);
+    }
+
+    .nav-logo-text {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+    .nav-logo-text span { color: var(--accent-h); }
+
+    .nav-badge {
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--accent-g);
+      border: 1px solid var(--border-h);
+      color: var(--accent-h);
+      letter-spacing: 0.05em;
+    }
+
+    /* ══════════════════════════════════════
+       HERO
+    ══════════════════════════════════════ */
+    .hero {
+      padding: 96px 0 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0;
+    }
+
+    /* Animated glow orb behind logo */
+    .hero-orb {
+      position: relative;
+      margin-bottom: 36px;
+    }
+
+    .hero-orb::before {
+      content: '';
+      position: absolute;
+      inset: -28px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,92,191,0.20) 0%, transparent 70%);
+      animation: orbPulse 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes orbPulse {
+      from { transform: scale(0.92); opacity: 0.7; }
+      to   { transform: scale(1.08); opacity: 1; }
+    }
+
+    .logo-ring {
+      position: relative;
+      width: 96px; height: 96px;
+      border-radius: 50%;
+      border: 2px solid rgba(124,92,191,0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-ring::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 2.5px solid transparent;
+      border-top-color: #7c5cbf;
+      border-right-color: rgba(124,92,191,0.35);
+      animation: spin 2.0s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .logo-inner {
+      width: 68px; height: 68px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, rgba(124,92,191,0.22), rgba(9,9,17,0.92));
+      border: 1px solid rgba(124,92,191,0.38);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 28px rgba(124,92,191,0.22), inset 0 0 20px rgba(124,92,191,0.10);
+    }
+
+    .logo-inner svg {
+      color: #956ee0;
+      filter: drop-shadow(0 0 6px rgba(149,110,224,0.55));
+    }
+
+    /* Title */
+    .hero-title {
+      font-size: clamp(36px, 6vw, 60px);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      color: #fff;
+      text-shadow: 0 0 40px rgba(149,110,224,0.35), 0 4px 16px rgba(0,0,0,0.8);
+    }
+
+    .hero-title .accent { color: #c49eff; }
+
+    .hero-sub {
+      margin-top: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: rgba(215,200,248,0.72);
+    }
+
+    .hero-desc {
+      margin-top: 22px;
+      max-width: 520px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--tx-2);
+      line-height: 1.65;
+    }
+
+    /* Separator */
+    .sep {
+      width: 64px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(124,92,191,0.55), transparent);
+      margin: 28px auto;
+    }
+
+    /* Download button group */
+    .btn-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-dl {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #7c5cbf, #956ee0);
+      color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 24px rgba(124,92,191,0.45), 0 2px 8px rgba(0,0,0,0.4);
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-dl::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.10), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .btn-dl:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(124,92,191,0.60), 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .btn-dl:hover::before { opacity: 1; }
+    .btn-dl:active { transform: translateY(0); }
+
+    .btn-dl-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      line-height: 1.2;
+    }
+    .btn-dl-meta small {
+      font-size: 10.5px;
+      font-weight: 500;
+      opacity: 0.75;
+      letter-spacing: 0.03em;
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 22px;
+      border-radius: 12px;
+      background: var(--bg-2);
+      color: var(--tx-2);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg-3);
+      border-color: var(--border-h);
+      color: var(--tx-1);
+    }
+
+    /* Requirement tags */
+    .req-tags {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .req-tag {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 600;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      color: var(--tx-3);
+    }
+
+    .req-tag i { font-size: 10px; color: var(--accent); }
+
+    /* ══════════════════════════════════════
+       FEATURES
+    ══════════════════════════════════════ */
+    .section {
+      padding: 72px 0;
+    }
+
+    .section-label {
+      text-align: center;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent-h);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: clamp(22px, 3.5vw, 30px);
+      font-weight: 800;
+      color: var(--tx-1);
+      margin-bottom: 10px;
+    }
+
+    .section-desc {
+      text-align: center;
+      font-size: 14px;
+      color: var(--tx-2);
+      max-width: 480px;
+      margin: 0 auto 48px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .feat-card {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color 0.2s, background 0.2s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(124,92,191,0.25), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .feat-card:hover {
+      border-color: var(--border-h);
+      background: var(--bg-2);
+      transform: translateY(-3px);
+    }
+
+    .feat-card:hover::before { opacity: 1; }
+
+    .feat-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      background: var(--accent-g);
+      border: 1px solid rgba(124,92,191,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-h);
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .feat-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--tx-1);
+    }
+
+    .feat-desc {
+      font-size: 13px;
+      color: var(--tx-2);
+      line-height: 1.6;
+    }
+
+    /* ══════════════════════════════════════
+       HOW IT WORKS
+    ══════════════════════════════════════ */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      padding: 24px 0;
+      position: relative;
+    }
+
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 60px;
+      bottom: -4px;
+      width: 1px;
+      background: linear-gradient(to bottom, rgba(124,92,191,0.3), transparent);
+    }
+
+    .step-num {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--accent-g);
+      border: 1.5px solid var(--border-h);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--accent-h);
+      flex-shrink: 0;
+    }
+
+    .step-body {}
+    .step-body h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--tx-1);
+      margin-bottom: 4px;
+    }
+    .step-body p {
+      font-size: 13.5px;
+      color: var(--tx-2);
+      line-height: 1.6;
+    }
+
+    /* ══════════════════════════════════════
+       CTA BANNER
+    ══════════════════════════════════════ */
+    .cta-section {
+      padding: 56px 0 88px;
+    }
+
+    .cta-card {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 52px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 0%, rgba(124,92,191,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 90% 100%, rgba(88,168,240,0.05) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .cta-card h2 {
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 800;
+      color: var(--tx-1);
+      margin-bottom: 10px;
+    }
+    .cta-card h2 .accent { color: #c49eff; }
+
+    .cta-card p {
+      font-size: 14px;
+      color: var(--tx-2);
+      max-width: 420px;
+      margin: 0 auto 28px;
+    }
+
+    /* ══════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════ */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 0;
+    }
+
+    .footer-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--tx-3);
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    .footer-logo svg { color: var(--accent); opacity: 0.6; }
+
+    .footer-copy {
+      font-size: 12px;
+      color: var(--tx-3);
+    }
+
+    .footer-copy span { color: var(--accent-h); opacity: 0.7; }
+
+    /* ══════════════════════════════════════
+       SCROLL ANIMATIONS
+    ══════════════════════════════════════ */
+    .anim-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .anim-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .hero { padding: 64px 0 56px; }
+      .cta-card { padding: 36px 20px; }
+      .features-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ══════════════════════════════════════
+       LANGUAGE PICKER
+    ══════════════════════════════════════ */
+    .lang-picker {
+      position: relative;
+    }
+
+    .lang-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      color: var(--tx-2);
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .lang-btn:hover {
+      background: var(--bg-3);
+      border-color: var(--border-h);
+    }
+
+    .lang-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      min-width: 150px;
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+
+    .lang-dropdown.open { display: block; }
+
+    .lang-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--tx-2);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .lang-option:hover {
+      background: var(--bg-2);
+      color: var(--tx-1);
+    }
+
+    .lang-option.active {
+      background: var(--accent-g);
+      color: var(--accent-h);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+<!-- WebGL background -->
+<canvas id="bg-canvas"></canvas>
+<div id="bg-overlay"></div>
+<div id="bg-grid"></div>
+
+<!-- ══════════════════════ NAV ══════════════════════ -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7v10l10 5 10-5V7L12 2z" stroke="#956ee0" stroke-width="1.5"
+                stroke-linejoin="round" fill="rgba(124,92,191,0.18)"/>
+          <path d="M2 7l10 5 10-5" stroke="#956ee0" stroke-width="1.5"/>
+          <path d="M12 12v10" stroke="#956ee0" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <span class="nav-logo-text">OsiProut <span>Manifester</span></span>
+    </a>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="nav-badge">v1.2.7</span>
+      <div class="lang-picker" id="lang-picker">
+        <button class="lang-btn" id="lang-btn" aria-label="Language">
+          <span id="lang-flag">🇫🇷</span>
+          <i class="fas fa-chevron-down" style="font-size:9px;opacity:0.5;"></i>
+        </button>
+        <div class="lang-dropdown" id="lang-dropdown"></div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════ PAGE ══════════════════════ -->
+<div id="page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-orb">
+      <div class="logo-ring">
+        <div class="logo-inner">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7v10l10 5 10-5V7L12 2z" stroke="currentColor" stroke-width="1.5"
+                  stroke-linejoin="round" fill="rgba(124,92,191,0.22)"/>
+            <path d="M2 7l10 5 10-5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M12 12v10" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <h1 class="hero-title">OsiProut <span class="accent">Manifester</span></h1>
+    <p class="hero-sub" data-i18n="hero-sub">Gestionnaire de manifests Steam</p>
+
+    <div class="sep"></div>
+
+    <p class="hero-desc" data-i18n="hero-desc">
+      Gérez, parcourez et installez vos manifests Steam directement depuis votre bibliothèque.
+      Détection automatique de Steam, interface sombre moderne, installateur guidé avec mise à jour automatique intégrée.
+    </p>
+
+    <div class="sep"></div>
+
+    <div class="btn-group">
+      <a href="https://github.com/ErrorNoName/OsiProut---Manifester/releases/download/installer/OsiProut-Manifester-Setup.exe" class="btn-dl" download>
+        <i class="fas fa-download" style="font-size:18px;"></i>
+        <div class="btn-dl-meta">
+          <span data-i18n="btn-download">Télécharger</span>
+          <small data-i18n="btn-download-meta">Windows x64 · ~90 MB · Installateur</small>
+        </div>
+      </a>
+      <a href="#features" class="btn-ghost">
+        <i class="fas fa-star"></i>
+        <span data-i18n="btn-features">Fonctionnalités</span>
+      </a>
+    </div>
+
+    <div class="req-tags">
+      <span class="req-tag"><i class="fab fa-windows"></i> <span data-i18n="req-win">Windows 10 / 11</span></span>
+      <span class="req-tag"><i class="fas fa-box-open"></i> <span data-i18n="req-portable">Installation guidée</span></span>
+      <span class="req-tag"><i class="fab fa-steam"></i> <span data-i18n="req-steam">Steam requis</span></span>
+      <span class="req-tag"><i class="fas fa-shield-alt"></i> <span data-i18n="req-free">Gratuit</span></span>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section" id="features">
+    <p class="section-label anim-up" data-i18n="feat-label">Fonctionnalités</p>
+    <h2 class="section-title anim-up" data-i18n="feat-title">Tout ce dont vous avez besoin</h2>
+    <p class="section-desc anim-up" data-i18n="feat-desc">Un outil complet pour gérer vos manifests Steam avec une interface pensée pour la simplicité.</p>
+
+    <div class="features-grid">
+      <div class="feat-card anim-up">
+        <div class="feat-icon"><i class="fas fa-search"></i></div>
+        <div>
+          <div class="feat-title" data-i18n="feat1-title">Détection automatique</div>
+          <div class="feat-desc" data-i18n="feat1-desc">Détecte le jeu ouvert dans Steam ou votre navigateur via Chrome DevTools Protocol — en temps réel, sans configuration.</div>
+        </div>
+      </div>
+
+      <div class="feat-card anim-up">
+        <div class="feat-icon"><i class="fas fa-layer-group"></i></div>
+        <div>
+          <div class="feat-title" data-i18n="feat2-title">Bibliothèque complète</div>
+          <div class="feat-desc" data-i18n="feat2-desc">Parcourez, filtrez et recherchez parmi des milliers de manifests. Tri par nom, branche, ou état d'installation.</div>
+        </div>
+      </div>
+
+      <div class="feat-card anim-up">
+        <div class="feat-icon"><i class="fas fa-download"></i></div>
+        <div>
+          <div class="feat-title" data-i18n="feat3-title">Installation en un clic</div>
+          <div class="feat-desc" data-i18n="feat3-desc">Copiez les fichiers manifest directement dans votre Steam libraryfolders avec confirmation visuelle instantanée.</div>
+        </div>
+      </div>
+
+      <div class="feat-card anim-up">
+        <div class="feat-icon"><i class="fas fa-bolt"></i></div>
+        <div>
+          <div class="feat-title" data-i18n="feat4-title">Overlay Steam</div>
+          <div class="feat-desc" data-i18n="feat4-desc">Accédez à vos manifests sans quitter le jeu grâce à l'overlay intégré, accessible via raccourci clavier.</div>
+        </div>
+      </div>
+
+      <div class="feat-card anim-up">
+        <div class="feat-icon"><i class="fas fa-cubes"></i></div>
+        <div>
+          <div class="feat-title" data-i18n="feat5-title">Ajout en masse</div>
+          <div class="feat-desc" data-i18n="feat5-desc">Sélectionnez et installez plusieurs manifests en une seule action grâce au mode sélection multiple.</div>
+        </div>
+      </div>
+
+      <div class="feat-card anim-up">
+        <div class="feat-icon"><i class="fas fa-box"></i></div>
+        <div>
+          <div class="feat-title" data-i18n="feat6-title">Installation simplifiée</div>
+          <div class="feat-desc" data-i18n="feat6-desc">Un installateur guidé en quelques clics — raccourci bureau créé automatiquement, mise à jour automatique intégrée.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section">
+    <p class="section-label anim-up" data-i18n="steps-label">Comment utiliser</p>
+    <h2 class="section-title anim-up" data-i18n="steps-title">Prêt en 3 étapes</h2>
+    <p class="section-desc anim-up" data-i18n="steps-desc">Pas de configuration complexe. Installez, lancez, et c'est parti.</p>
+
+    <div class="steps">
+      <div class="step anim-up">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3 data-i18n="step1-title">Télécharger & installer</h3>
+          <p data-i18n="step1-desc">Téléchargez <code style="font-family:monospace;color:var(--accent-h);font-size:13px;">OsiProut-Manifester-Setup.exe</code> et lancez l'installateur — choisissez votre dossier et c'est prêt en quelques secondes.</p>
+        </div>
+      </div>
+
+      <div class="step anim-up">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3 data-i18n="step2-title">Ouvrir un jeu Steam</h3>
+          <p data-i18n="step2-desc">Naviguez sur la page du jeu dans le client Steam ou dans votre navigateur. Le manifester détecte automatiquement l'AppID en temps réel.</p>
+        </div>
+      </div>
+
+      <div class="step anim-up">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3 data-i18n="step3-title">Installer les manifests</h3>
+          <p data-i18n="step3-desc">Sélectionnez les manifests souhaités dans la liste et cliquez sur <strong style="color:var(--tx-1)">Installer</strong>. Les fichiers sont copiés directement dans votre répertoire Steam.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-card anim-up">
+      <h2 data-i18n-html="cta-title">Prêt à commencer ?<br>Téléchargez <span class="accent">gratuitement</span>.</h2>
+      <p data-i18n="cta-desc">Installateur guidé, rapide, sans inscription. Compatible Windows 10 et 11.</p>
+      <div class="btn-group">
+        <a href="https://github.com/ErrorNoName/OsiProut---Manifester/releases/download/installer/OsiProut-Manifester-Setup.exe" class="btn-dl" download>
+          <i class="fas fa-download" style="font-size:18px;"></i>
+          <div class="btn-dl-meta">
+            <span data-i18n="cta-btn">Télécharger OsiProut Manifester</span>
+            <small data-i18n="btn-download-meta">Windows x64 · ~90 MB · Installateur</small>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /#page -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 7v10l10 5 10-5V7L12 2z" stroke="currentColor" stroke-width="1.5"
+              stroke-linejoin="round" fill="rgba(124,92,191,0.18)"/>
+        <path d="M2 7l10 5 10-5" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M12 12v10" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+      OsiProut Manifester
+    </div>
+    <span class="footer-copy" data-i18n-html="footer-copy">© 2026 <span>OsiProut</span> — Tous droits réservés</span>
+  </div>
+</footer>
+
+<!-- ══════════════════════ WebGL2 Background ══════════════════════ -->
+<script>
+(function () {
+  'use strict';
+  const cvs = document.getElementById('bg-canvas');
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  function resize() {
+    cvs.width  = window.innerWidth  * dpr;
+    cvs.height = window.innerHeight * dpr;
+    cvs.style.width  = window.innerWidth  + 'px';
+    cvs.style.height = window.innerHeight + 'px';
+  }
+  resize();
+  const gl = cvs.getContext('webgl2');
+  if (!gl) { cvs.style.display = 'none'; return; }
+
+  const VS = `#version 300 es
+in vec2 a;
+void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
+
+  const FS = `#version 300 es
+precision highp float;
+uniform vec2  uRes;
+uniform float uT;
+out vec4 fragColor;
+
+float hash(vec2 p){
+  p = fract(p * vec2(0.1031, 0.1030));
+  p += dot(p, p.yx + 33.33);
+  return fract((p.x + p.y) * p.x);
+}
+float vn(vec2 p){
+  vec2 i = floor(p), f = fract(p);
+  f = f*f*(3.0-2.0*f);
+  return mix(mix(hash(i), hash(i+vec2(1,0)), f.x),
+             mix(hash(i+vec2(0,1)), hash(i+vec2(1,1)), f.x), f.y);
+}
+float fbm(vec2 p, float ts){
+  float v=0.0, a=0.5;
+  mat2 rot=mat2(0.866,0.5,-0.5,0.866);
+  for(int i=0;i<5;i++){
+    v += a * vn(p + ts*(float(i)*0.07+0.03));
+    p = rot*p*2.1; a*=0.5;
+  }
+  return v;
+}
+vec3 pal(float t){
+  vec3 a=vec3(0.50,0.36,0.78);
+  vec3 b=vec3(0.30,0.22,0.38);
+  vec3 c=vec3(0.90,1.10,1.40);
+  vec3 d=vec3(0.00,0.08,0.32);
+  return a + b*cos(6.28318*(c*t+d));
+}
+void main(){
+  vec2 uv  = gl_FragCoord.xy / uRes;
+  float t  = uT * 0.12;
+  float asp = uRes.x / uRes.y;
+  vec2 p   = uv * vec2(asp, 1.0) * 1.8;
+  vec2 q   = vec2(fbm(p + t*0.4, t), fbm(p + vec2(5.2,1.3) + t*0.4, t));
+  vec2 r   = vec2(fbm(p + 4.0*q + vec2(1.7,9.2), t*0.7),
+                  fbm(p + 4.0*q + vec2(8.3,2.8),  t*0.7));
+  float f  = fbm(p*0.8 + 3.5*r, t*0.5);
+  f = f*1.2 - 0.05;
+  vec3 col = pal(f + t*0.08);
+  col += smoothstep(0.55, 0.85, f) * vec3(0.12, 0.08, 0.22);
+  col  = mix(vec3(0.03, 0.02, 0.08), col, 0.96);
+  col  = pow(clamp(col, 0.0, 1.0), vec3(0.80));
+  fragColor = vec4(col, 1.0);
+}`;
+
+  function mkShader(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, mkShader(gl.VERTEX_SHADER, VS));
+  gl.attachShader(prog, mkShader(gl.FRAGMENT_SHADER, FS));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const aLoc = gl.getAttribLocation(prog, 'a');
+  gl.enableVertexAttribArray(aLoc);
+  gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
+
+  const uRes = gl.getUniformLocation(prog, 'uRes');
+  const uT   = gl.getUniformLocation(prog, 'uT');
+  const t0   = performance.now();
+
+  window.addEventListener('resize', resize);
+
+  function draw() {
+    gl.viewport(0, 0, cvs.width, cvs.height);
+    gl.uniform2f(uRes, cvs.width, cvs.height);
+    gl.uniform1f(uT, (performance.now() - t0) / 1000);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(draw);
+  }
+  draw();
+}());
+</script>
+
+<!-- ══════════════════════ Scroll animations ══════════════════════ -->
+<script>
+(function () {
+  const els = document.querySelectorAll('.anim-up');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e, idx) => {
+      if (e.isIntersecting) {
+        // stagger siblings in same parent
+        const siblings = [...e.target.parentElement.querySelectorAll('.anim-up:not(.visible)')];
+        const delay = siblings.indexOf(e.target);
+        setTimeout(() => e.target.classList.add('visible'), delay * 80);
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  els.forEach(el => io.observe(el));
+}());
+</script>
+
+<!-- ══════════════════════ i18n Translation System ══════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  const LANGS = {
+    fr: { flag: '🇫🇷', label: 'Français' },
+    en: { flag: '🇬🇧', label: 'English' },
+    es: { flag: '🇪🇸', label: 'Español' },
+    de: { flag: '🇩🇪', label: 'Deutsch' },
+    pt: { flag: '🇧🇷', label: 'Português' },
+    ru: { flag: '🇷🇺', label: 'Русский' },
+    zh: { flag: '🇨🇳', label: '中文' },
+    ja: { flag: '🇯🇵', label: '日本語' },
+    ar: { flag: '🇸🇦', label: 'العربية' },
+    tr: { flag: '🇹🇷', label: 'Türkçe' }
+  };
+
+  const T = {
+    fr: {
+      'page-title': 'OsiProut Manifester — Télécharger',
+      'page-desc': 'Télécharger OsiProut Manifester — Gestionnaire de manifests Steam. Installateur NSIS, installation rapide avec mise à jour automatique.','
+      'hero-sub': 'Gestionnaire de manifests Steam',
+      'hero-desc': 'Gérez, parcourez et installez vos manifests Steam directement depuis votre bibliothèque. Détection automatique de Steam, interface sombre moderne, installateur guidé avec mise à jour automatique intégrée.',
+      'btn-download': 'Télécharger',
+      'btn-download-meta': 'Windows x64 · ~90 MB · Installateur',
+      'btn-features': 'Fonctionnalités',
+      'req-win': 'Windows 10 / 11',
+      'req-portable': 'Installation guidée',
+      'req-steam': 'Steam requis',
+      'req-free': 'Gratuit',
+      'feat-label': 'Fonctionnalités',
+      'feat-title': 'Tout ce dont vous avez besoin',
+      'feat-desc': 'Un outil complet pour gérer vos manifests Steam avec une interface pensée pour la simplicité.',
+      'feat1-title': 'Détection automatique',
+      'feat1-desc': 'Détecte le jeu ouvert dans Steam ou votre navigateur via Chrome DevTools Protocol — en temps réel, sans configuration.',
+      'feat2-title': 'Bibliothèque complète',
+      'feat2-desc': 'Parcourez, filtrez et recherchez parmi des milliers de manifests. Tri par nom, branche, ou état d\'installation.',
+      'feat3-title': 'Installation en un clic',
+      'feat3-desc': 'Copiez les fichiers manifest directement dans votre Steam libraryfolders avec confirmation visuelle instantanée.',
+      'feat4-title': 'Overlay Steam',
+      'feat4-desc': 'Accédez à vos manifests sans quitter le jeu grâce à l\'overlay intégré, accessible via raccourci clavier.',
+      'feat5-title': 'Ajout en masse',
+      'feat5-desc': 'Sélectionnez et installez plusieurs manifests en une seule action grâce au mode sélection multiple.',
+      'feat6-title': 'Installation simplifiée',
+      'feat6-desc': 'Un installateur guidé en quelques clics — raccourci bureau créé automatiquement, mise à jour automatique intégrée.',
+      'steps-label': 'Comment utiliser',
+      'steps-title': 'Prêt en 3 étapes',
+      'steps-desc': 'Pas de configuration complexe. Installez, lancez, et c\'est parti.',
+      'step1-title': 'Télécharger & installer',
+      'step1-desc': 'Téléchargez <code style="font-family:monospace;color:var(--accent-h);font-size:13px;">OsiProut-Manifester-Setup.exe</code> et lancez l\'installateur — choisissez votre dossier et c\'est prêt en quelques secondes.',
+      'step2-title': 'Ouvrir un jeu Steam',
+      'step2-desc': 'Naviguez sur la page du jeu dans le client Steam ou dans votre navigateur. Le manifester détecte automatiquement l\'AppID en temps réel.',
+      'step3-title': 'Installer les manifests',
+      'step3-desc': 'Sélectionnez les manifests souhaités dans la liste et cliquez sur <strong style="color:var(--tx-1)">Installer</strong>. Les fichiers sont copiés directement dans votre répertoire Steam.',
+      'cta-title': 'Prêt à commencer ?<br>Téléchargez <span class="accent">gratuitement</span>.',
+      'cta-desc': 'Installateur guidé, rapide, sans inscription. Compatible Windows 10 et 11.',
+      'cta-btn': 'Télécharger OsiProut Manifester',
+      'footer-copy': '© 2026 <span>OsiProut</span> — Tous droits réservés'
+    },
+    en: {
+      'page-title': 'OsiProut Manifester — Download',
+      'page-desc': 'Download OsiProut Manifester — Steam manifest manager. NSIS installer, quick setup with built-in auto-update.',
+      'hero-sub': 'Steam Manifest Manager',
+      'hero-desc': 'Manage, browse and install your Steam manifests directly from your library. Automatic Steam detection, modern dark interface, guided installer with built-in auto-update.',
+      'btn-download': 'Download',
+      'btn-download-meta': 'Windows x64 · ~90 MB · Installer',
+      'btn-features': 'Features',
+      'req-win': 'Windows 10 / 11',
+      'req-portable': 'Guided installation',
+      'req-steam': 'Steam required',
+      'req-free': 'Free',
+      'feat-label': 'Features',
+      'feat-title': 'Everything you need',
+      'feat-desc': 'A complete tool to manage your Steam manifests with an interface designed for simplicity.',
+      'feat1-title': 'Auto Detection',
+      'feat1-desc': 'Detects the open game in Steam or your browser via Chrome DevTools Protocol — real-time, no configuration needed.',
+      'feat2-title': 'Complete Library',
+      'feat2-desc': 'Browse, filter and search among thousands of manifests. Sort by name, branch, or installation status.',
+      'feat3-title': 'One-Click Install',
+      'feat3-desc': 'Copy manifest files directly to your Steam libraryfolders with instant visual confirmation.',
+      'feat4-title': 'Steam Overlay',
+      'feat4-desc': 'Access your manifests without leaving the game thanks to the built-in overlay, accessible via keyboard shortcut.',
+      'feat5-title': 'Bulk Add',
+      'feat5-desc': 'Select and install multiple manifests in a single action with the multi-select mode.',
+      'feat6-title': 'Easy Installation',
+      'feat6-desc': 'A guided installer in just a few clicks — desktop shortcut created automatically, built-in auto-update.',
+      'steps-label': 'How to use',
+      'steps-title': 'Ready in 3 steps',
+      'steps-desc': 'No complex setup. Install, launch, and you\'re good to go.',
+      'step1-title': 'Download & Install',
+      'step1-desc': 'Download <code style="font-family:monospace;color:var(--accent-h);font-size:13px;">OsiProut-Manifester-Setup.exe</code> and run the installer — choose your folder and you\'re ready in seconds.',
+      'step2-title': 'Open a Steam Game',
+      'step2-desc': 'Navigate to the game page in the Steam client or in your browser. The manifester automatically detects the AppID in real-time.',
+      'step3-title': 'Install Manifests',
+      'step3-desc': 'Select the desired manifests from the list and click <strong style="color:var(--tx-1)">Install</strong>. Files are copied directly to your Steam directory.',
+      'cta-title': 'Ready to start?<br>Download <span class="accent">for free</span>.',
+      'cta-desc': 'Guided installer, fast, no sign-up. Compatible with Windows 10 and 11.',
+      'cta-btn': 'Download OsiProut Manifester',
+      'footer-copy': '© 2026 <span>OsiProut</span> — All rights reserved'
+    },
+    es: {
+      'page-title': 'OsiProut Manifester — Descargar',
+      'page-desc': 'Descargar OsiProut Manifester — Gestor de manifests de Steam. Instalador NSIS, instalación rápida con actualización automática.',
+      'hero-sub': 'Gestor de manifests de Steam',
+      'hero-desc': 'Gestione, explore e instale sus manifests de Steam directamente desde su biblioteca. Detección automática de Steam, interfaz oscura moderna, instalador guiado con actualización automática integrada.',
+      'btn-download': 'Descargar',
+      'btn-download-meta': 'Windows x64 · ~90 MB · Instalador',
+      'btn-features': 'Características',
+      'req-win': 'Windows 10 / 11',
+      'req-portable': 'Instalación guiada',
+      'req-steam': 'Steam requerido',
+      'req-free': 'Gratis',
+      'feat-label': 'Características',
+      'feat-title': 'Todo lo que necesitas',
+      'feat-desc': 'Una herramienta completa para gestionar tus manifests de Steam con una interfaz diseñada para la simplicidad.',
+      'feat1-title': 'Detección automática',
+      'feat1-desc': 'Detecta el juego abierto en Steam o tu navegador mediante Chrome DevTools Protocol — en tiempo real, sin configuración.',
+      'feat2-title': 'Biblioteca completa',
+      'feat2-desc': 'Explore, filtre y busque entre miles de manifests. Ordene por nombre, rama o estado de instalación.',
+      'feat3-title': 'Instalación en un clic',
+      'feat3-desc': 'Copie los archivos manifest directamente en sus libraryfolders de Steam con confirmación visual instantánea.',
+      'feat4-title': 'Overlay de Steam',
+      'feat4-desc': 'Acceda a sus manifests sin salir del juego gracias al overlay integrado, accesible por atajo de teclado.',
+      'feat5-title': 'Añadir en masa',
+      'feat5-desc': 'Seleccione e instale varios manifests en una sola acción con el modo de selección múltiple.',
+      'feat6-title': 'Instalación sencilla',
+      'feat6-desc': 'Un instalador guiado en pocos clics — acceso directo en el escritorio creado automáticamente, actualización automática integrada.',
+      'steps-label': 'Cómo usar',
+      'steps-title': 'Listo en 3 pasos',
+      'steps-desc': 'Sin configuración compleja. Instale, ejecute y listo.',
+      'step1-title': 'Descargar e instalar',
+      'step1-desc': 'Descargue <code style="font-family:monospace;color:var(--accent-h);font-size:13px;">OsiProut-Manifester-Setup.exe</code> y ejecute el instalador — elija su carpeta y estará listo en segundos.',
+      'step2-title': 'Abrir un juego de Steam',
+      'step2-desc': 'Navegue a la página del juego en el cliente de Steam o en su navegador. El manifester detecta automáticamente el AppID en tiempo real.',
+      'step3-title': 'Instalar manifests',
+      'step3-desc': 'Seleccione los manifests deseados de la lista y haga clic en <strong style="color:var(--tx-1)">Instalar</strong>. Los archivos se copian directamente a su directorio de Steam.',
+      'cta-title': '¿Listo para empezar?<br>Descargue <span class="accent">gratis</span>.',
+      'cta-desc': 'Instalador guiado, rápido, sin registro. Compatible con Windows 10 y 11.',
+      'cta-btn': 'Descargar OsiProut Manifester',
+      'footer-copy': '© 2026 <span>OsiProut</span> — Todos los derechos reservados'
+    },
+    de: {
+      'page-title': 'OsiProut Manifester — Herunterladen',
+      'page-desc': 'OsiProut Manifester herunterladen — Steam-Manifest-Manager. NSIS-Installer, schnelle Einrichtung mit Auto-Update.',
+      'hero-sub': 'Steam-Manifest-Manager',
+      'hero-desc': 'Verwalten, durchsuchen und installieren Sie Ihre Steam-Manifeste direkt aus Ihrer Bibliothek. Automatische Steam-Erkennung, moderne dunkle Oberfläche, geführter Installer mit integriertem Auto-Update.',
+      'btn-download': 'Herunterladen',
+      'btn-download-meta': 'Windows x64 · ~90 MB · Installationspaket',
+      'btn-features': 'Funktionen',
+      'req-win': 'Windows 10 / 11',
+      'req-portable': 'Geführte Installation',
+      'req-steam': 'Steam erforderlich',
+      'req-free': 'Kostenlos',
+      'feat-label': 'Funktionen',
+      'feat-title': 'Alles was Sie brauchen',
+      'feat-desc': 'Ein vollständiges Werkzeug zur Verwaltung Ihrer Steam-Manifeste mit einer Oberfläche für maximale Einfachheit.',
+      'feat1-title': 'Automatische Erkennung',
+      'feat1-desc': 'Erkennt das geöffnete Spiel in Steam oder Ihrem Browser über Chrome DevTools Protocol — in Echtzeit, ohne Konfiguration.',
+      'feat2-title': 'Vollständige Bibliothek',
+      'feat2-desc': 'Durchsuchen, filtern und suchen Sie unter Tausenden von Manifesten. Sortierung nach Name, Branch oder Installationsstatus.',
+      'feat3-title': 'Ein-Klick-Installation',
+      'feat3-desc': 'Kopieren Sie Manifest-Dateien direkt in Ihre Steam-Libraryfolders mit sofortiger visueller Bestätigung.',
+      'feat4-title': 'Steam-Overlay',
+      'feat4-desc': 'Greifen Sie auf Ihre Manifeste zu, ohne das Spiel zu verlassen, dank des integrierten Overlays per Tastenkombination.',
+      'feat5-title': 'Massenhinzufügung',
+      'feat5-desc': 'Wählen und installieren Sie mehrere Manifeste in einer einzigen Aktion mit dem Mehrfachauswahlmodus.',
+      'feat6-title': 'Einfache Installation',
+      'feat6-desc': 'Ein geführter Installer in wenigen Klicks — Desktop-Verknüpfung wird automatisch erstellt, integriertes Auto-Update.',
+      'steps-label': 'Anleitung',
+      'steps-title': 'In 3 Schritten bereit',
+      'steps-desc': 'Keine komplexe Einrichtung. Installieren, starten, und los geht\'s.',
+      'step1-title': 'Herunterladen & installieren',
+      'step1-desc': 'Laden Sie <code style="font-family:monospace;color:var(--accent-h);font-size:13px;">OsiProut-Manifester-Setup.exe</code> herunter und führen Sie den Installer aus — wählen Sie Ihren Ordner und sind in Sekunden bereit.',
+      'step2-title': 'Ein Steam-Spiel öffnen',
+      'step2-desc': 'Navigieren Sie zur Spielseite im Steam-Client oder in Ihrem Browser. Der Manifester erkennt die AppID automatisch in Echtzeit.',
+      'step3-title': 'Manifeste installieren',
+      'step3-desc': 'Wählen Sie die gewünschten Manifeste aus der Liste und klicken Sie auf <strong style="color:var(--tx-1)">Installieren</strong>. Die Dateien werden direkt in Ihr Steam-Verzeichnis kopiert.',
+      'cta-title': 'Bereit anzufangen?<br>Laden Sie <span class="accent">kostenlos</span> herunter.',
+      'cta-desc': 'Geführter Installer, schnell, ohne Anmeldung. Kompatibel mit Windows 10 und 11.',
+      'cta-btn': 'OsiProut Manifester herunterladen',
+      'footer-copy': '© 2026 <span>OsiProut</span> — Alle Rechte vorbehalten'
+    },
+    pt: {
+      'page-title': 'OsiProut Manifester — Download',
+      'page-desc': 'Baixar OsiProut Manifester — Gerenciador de manifests Steam. Instalador NSIS, instalação rápida com atualização automática.',
+      'hero-sub': 'Gerenciador de manifests Steam',
+      'hero-desc': 'Gerencie, navegue e instale seus manifests Steam diretamente da sua biblioteca. Detecção automática do Steam, interface escura moderna, instalador guiado com atualização automática integrada.',
+      'btn-download': 'Baixar',
+      'btn-download-meta': 'Windows x64 · ~90 MB · Instalador',
+      'btn-features': 'Recursos',
+      'req-win': 'Windows 10 / 11',
+      'req-portable': 'Instalação guiada',
+      'req-steam': 'Steam necessário',
+      'req-free': 'Gratuito',
+      'feat-label': 'Recursos',
+      'feat-title': 'Tudo o que você precisa',
+      'feat-desc': 'Uma ferramenta completa para gerenciar seus manifests Steam com uma interface projetada para simplicidade.',
+      'feat1-title': 'Detecção automática',
+      'feat1-desc': 'Detecta o jogo aberto no Steam ou seu navegador via Chrome DevTools Protocol — em tempo real, sem configuração.',
+      'feat2-title': 'Biblioteca completa',
+      'feat2-desc': 'Navegue, filtre e pesquise entre milhares de manifests. Ordene por nome, branch ou status de instalação.',
+      'feat3-title': 'Instalação em um clique',
+      'feat3-desc': 'Copie os arquivos manifest diretamente para suas libraryfolders do Steam com confirmação visual instantânea.',
+      'feat4-title': 'Overlay Steam',
+      'feat4-desc': 'Acesse seus manifests sem sair do jogo graças ao overlay integrado, acessível por atalho de teclado.',
+      'feat5-title': 'Adição em massa',
+      'feat5-desc': 'Selecione e instale vários manifests em uma única ação com o modo de seleção múltipla.',
+      'feat6-title': 'Instalação simplificada',
+      'feat6-desc': 'Um instalador guiado em poucos cliques — atalho na área de trabalho criado automaticamente, atualização automática integrada.',
+      'steps-label': 'Como usar',
+      'steps-title': 'Pronto em 3 passos',
+      'steps-desc': 'Sem configuração complexa. Instale, execute e pronto.',
+      'step1-title': 'Baixar e instalar',
+      'step1-desc': 'Baixe <code style="font-family:monospace;color:var(--accent-h);font-size:13px;">OsiProut-Manifester-Setup.exe</code> e execute o instalador — escolha sua pasta e estará pronto em segundos.',
+      'step2-title': 'Abrir um jogo Steam',
+      'step2-desc': 'Navegue até a página do jogo no cliente Steam ou no seu navegador. O manifester detecta automaticamente o AppID em tempo real.',
+      'step3-title': 'Instalar manifests',
+      'step3-desc': 'Selecione os manifests desejados na lista e clique em <strong style="color:var(--tx-1)">Instalar</strong>. Os arquivos são copiados diretamente para o diretório Steam.',
+      'cta-title': 'Pronto para começar?<br>Baixe <span class="accent">gratuitamente</span>.',
+      'cta-desc': 'Instalador guiado, rápido, sem cadastro. Compatível com Windows 10 e 11.',
+      'cta-btn': 'Baixar OsiProut Manifester',
+      'footer-copy': '© 2026 <span>OsiProut</span> — Todos os direitos reservados'
+    },
+    ru: {
+      'page-title': 'OsiProut Manifester — Скачать',
+      'page-desc': 'Скачать OsiProut Manifester — Менеджер манифестов Steam. Установщик NSIS, быстрая установка с авто-обновлением.',
+      'hero-sub': 'Менеджер манифестов Steam',
+      'hero-desc': 'Управляйте, просматривайте и устанавливайте манифесты Steam прямо из вашей библиотеки. Автоматическое обнаружение Steam, современный тёмный интерфейс, пошаговый установщик со встроенным авто-обновлением.',
+      'btn-download': 'Скачать',
+      'btn-download-meta': 'Windows x64 · ~90 МБ · Установщик',
+      'btn-features': 'Возможности',
+      'req-win': 'Windows 10 / 11',
+      'req-portable': 'Пошаговая установка',
+      'req-steam': 'Требуется Steam',
+      'req-free': 'Бесплатно',
+      'feat-label': 'Возможности',
+      'feat-title': 'Всё, что вам нужно',
+      'feat-desc': 'Полноценный инструмент для управления манифестами Steam с интерфейсом, созданным для простоты.',
+      'feat1-title': 'Автоопределение',
+      'feat1-desc': 'Определяет открытую игру в Steam или браузере через Chrome DevTools Protocol — в реальном времени, без настройки.',
+      'feat2-title': 'Полная библиотека',
+      'feat2-desc': 'Просматривайте, фильтруйте и ищите среди тысяч манифестов. Сортировка по имени, ветке или статусу установки.',
+      'feat3-title': 'Установка в один клик',
+      'feat3-desc': 'Копируйте файлы манифестов прямо в папку Steam libraryfolders с мгновенным визуальным подтверждением.',
+      'feat4-title': 'Оверлей Steam',
+      'feat4-desc': 'Получайте доступ к манифестам, не выходя из игры, благодаря встроенному оверлею с горячей клавишей.',
+      'feat5-title': 'Массовое добавление',
+      'feat5-desc': 'Выбирайте и устанавливайте несколько манифестов одним действием с режимом множественного выбора.',
+      'feat6-title': 'Простая установка',
+      'feat6-desc': 'Пошаговый установщик за несколько кликов — ярлык на рабочем столе создаётся автоматически, встроенное авто-обновление.',
+      'steps-label': 'Как использовать',
+      'steps-title': 'Готово за 3 шага',
+      'steps-desc': 'Без сложной настройки. Установите, запустите — и всё готово.',
+      'step1-title': 'Скачать и установить',
+      'step1-desc': 'Скачайте <code style="font-family:monospace;color:var(--accent-h);font-size:13px;">OsiProut-Manifester-Setup.exe</code> и запустите установщик — выберите папку и готово за несколько секунд.',
+      'step2-title': 'Открыть игру Steam',
+      'step2-desc': 'Перейдите на страницу игры в клиенте Steam или в браузере. Manifester автоматически определит AppID в реальном времени.',
+      'step3-title': 'Установить манифесты',
+      'step3-desc': 'Выберите нужные манифесты из списка и нажмите <strong style="color:var(--tx-1)">Установить</strong>. Файлы копируются прямо в каталог Steam.',
+      'cta-title': 'Готовы начать?<br>Скачайте <span class="accent">бесплатно</span>.',
+      'cta-desc': 'Пошаговый установщик, быстрый, без регистрации. Совместима с Windows 10 и 11.',
+      'cta-btn': 'Скачать OsiProut Manifester',
+      'footer-copy': '© 2026 <span>OsiProut</span> — Все права защищены'
+    },
+    zh: {
+      'page-title': 'OsiProut Manifester — 下载',
+      'page-desc': '下载 OsiProut Manifester — Steam 清单管理器。NSIS 安装程序，快速安装，内置自动更新。',
+      'hero-sub': 'Steam 清单管理器',
+      'hero-desc': '直接从您的库中管理、浏览和安装 Steam 清单。自动检测 Steam，现代暗色界面，引导式安装并内置自动更新。',
+      'btn-download': '下载',
+      'btn-download-meta': 'Windows x64 · ~90 MB · 安装程序',
+      'btn-features': '功能',
+      'req-win': 'Windows 10 / 11',
+      'req-portable': '引导式安装',
+      'req-steam': '需要 Steam',
+      'req-free': '免费',
+      'feat-label': '功能',
+      'feat-title': '您所需的一切',
+      'feat-desc': '一个完整的工具，用简洁的界面管理您的 Steam 清单。',
+      'feat1-title': '自动检测',
+      'feat1-desc': '通过 Chrome DevTools Protocol 实时检测 Steam 或浏览器中打开的游戏 — 无需配置。',
+      'feat2-title': '完整库',
+      'feat2-desc': '浏览、筛选和搜索数千个清单。按名称、分支或安装状态排序。',
+      'feat3-title': '一键安装',
+      'feat3-desc': '将清单文件直接复制到您的 Steam libraryfolders，即时视觉确认。',
+      'feat4-title': 'Steam 覆盖层',
+      'feat4-desc': '通过内置覆盖层访问清单，无需退出游戏，可通过快捷键启动。',
+      'feat5-title': '批量添加',
+      'feat5-desc': '使用多选模式一次选择并安装多个清单。',
+      'feat6-title': '简便安装',
+      'feat6-desc': '几步引导安装 — 自动创建桌面快捷方式，内置自动更新。',
+      'steps-label': '使用方法',
+      'steps-title': '3 步就绪',
+      'steps-desc': '无需复杂设置。安装、启动，即可开始。',
+      'step1-title': '下载并安装',
+      'step1-desc': '下载 <code style="font-family:monospace;color:var(--accent-h);font-size:13px;">OsiProut-Manifester-Setup.exe</code> 并运行安装程序 — 选择文件夹，几秒内即可完成。',
+      'step2-title': '打开 Steam 游戏',
+      'step2-desc': '在 Steam 客户端或浏览器中导航到游戏页面。Manifester 自动实时检测 AppID。',
+      'step3-title': '安装清单',
+      'step3-desc': '从列表中选择所需清单，然后点击 <strong style="color:var(--tx-1)">安装</strong>。文件直接复制到 Steam 目录。',
+      'cta-title': '准备开始？<br><span class="accent">免费</span>下载。',
+      'cta-desc': '引导式安装，快速，无需注册。兼容 Windows 10 和 11。',
+      'cta-btn': '下载 OsiProut Manifester',
+      'footer-copy': '© 2026 <span>OsiProut</span> — 保留所有权利'
+    },
+    ja: {
+      'page-title': 'OsiProut Manifester — ダウンロード',
+      'page-desc': 'OsiProut Manifester をダウンロード — Steam マニフェストマネージャー。NTSISインストーラー、自動更新内蔵。',
+      'hero-sub': 'Steam マニフェストマネージャー',
+      'hero-desc': 'ライブラリから直接 Steam マニフェストを管理、閲覧、インストール。Steam 自動検出、モダンなダークインターフェース、ガイド付きインストーラーと自動更新機能内蔵。',
+      'btn-download': 'ダウンロード',
+      'btn-download-meta': 'Windows x64 · 約90 MB · インストーラー',
+      'btn-features': '機能',
+      'req-win': 'Windows 10 / 11',
+      'req-portable': 'ガイド付きインストール',
+      'req-steam': 'Steam 必須',
+      'req-free': '無料',
+      'feat-label': '機能',
+      'feat-title': '必要なものがすべて揃っています',
+      'feat-desc': 'シンプルさを追求したインターフェースで Steam マニフェストを管理する完全なツール。',
+      'feat1-title': '自動検出',
+      'feat1-desc': 'Chrome DevTools Protocol を通じて Steam またはブラウザで開いているゲームをリアルタイムで検出 — 設定不要。',
+      'feat2-title': '完全なライブラリ',
+      'feat2-desc': '数千のマニフェストを閲覧、フィルタリング、検索。名前、ブランチ、インストール状態で並べ替え。',
+      'feat3-title': 'ワンクリックインストール',
+      'feat3-desc': 'マニフェストファイルを Steam libraryfolders に直接コピー。即座に視覚的確認。',
+      'feat4-title': 'Steam オーバーレイ',
+      'feat4-desc': '内蔵オーバーレイでゲームを離れることなくマニフェストにアクセス。キーボードショートカットで起動。',
+      'feat5-title': '一括追加',
+      'feat5-desc': '複数選択モードで複数のマニフェストを一度に選択してインストール。',
+      'feat6-title': 'かんたんインストール',
+      'feat6-desc': '数クリックのガイド付きインストーラー — デスクトップショートカットを自動作成、自動更新機能内蔵。',
+      'steps-label': '使い方',
+      'steps-title': '3ステップで準備完了',
+      'steps-desc': '複雑な設定は不要。インストールして起動するだけ。',
+      'step1-title': 'ダウンロード＆インストール',
+      'step1-desc': '<code style="font-family:monospace;color:var(--accent-h);font-size:13px;">OsiProut-Manifester-Setup.exe</code> をダウンロードしてインストーラーを実行 — フォルダを選んで数秒で完了。',
+      'step2-title': 'Steam ゲームを開く',
+      'step2-desc': 'Steam クライアントまたはブラウザでゲームページに移動。Manifester が AppID をリアルタイムで自動検出します。',
+      'step3-title': 'マニフェストをインストール',
+      'step3-desc': 'リストから必要なマニフェストを選択し、<strong style="color:var(--tx-1)">インストール</strong>をクリック。ファイルが Steam ディレクトリに直接コピーされます。',
+      'cta-title': '始める準備はできましたか？<br><span class="accent">無料で</span>ダウンロード。',
+      'cta-desc': 'ガイド付きインストーラー、高速、登録不要。Windows 10 および 11 対応。',
+      'cta-btn': 'OsiProut Manifester をダウンロード',
+      'footer-copy': '© 2026 <span>OsiProut</span> — All rights reserved'
+    },
+    ar: {
+      'page-title': 'OsiProut Manifester — تحميل',
+      'page-desc': 'تحميل OsiProut Manifester — مدير manifests Steam. مثبت NSIS، تثبيت سريع مع تحديث تلقائي.',
+      'hero-sub': 'مدير manifests Steam',
+      'hero-desc': 'قم بإدارة وتصفح وتثبيت manifests Steam مباشرة من مكتبتك. كشف تلقائي لـ Steam، واجهة داكنة حديثة، مثبت مُوجَّه مع تحديث تلقائي مدمج.',
+      'btn-download': 'تحميل',
+      'btn-download-meta': 'Windows x64 · ~90 MB · مثبت',
+      'btn-features': 'الميزات',
+      'req-win': 'Windows 10 / 11',
+      'req-portable': 'تثبيت مُوجَّه',
+      'req-steam': 'يتطلب Steam',
+      'req-free': 'مجاني',
+      'feat-label': 'الميزات',
+      'feat-title': 'كل ما تحتاجه',
+      'feat-desc': 'أداة كاملة لإدارة manifests Steam بواجهة مصممة للبساطة.',
+      'feat1-title': 'الكشف التلقائي',
+      'feat1-desc': 'يكتشف اللعبة المفتوحة في Steam أو متصفحك عبر Chrome DevTools Protocol — في الوقت الفعلي، بدون إعداد.',
+      'feat2-title': 'مكتبة كاملة',
+      'feat2-desc': 'تصفح وفلتر وابحث بين آلاف manifests. رتب حسب الاسم أو الفرع أو حالة التثبيت.',
+      'feat3-title': 'تثبيت بنقرة واحدة',
+      'feat3-desc': 'انسخ ملفات manifest مباشرة إلى مجلدات مكتبة Steam مع تأكيد بصري فوري.',
+      'feat4-title': 'Steam Overlay',
+      'feat4-desc': 'الوصول إلى manifests بدون مغادرة اللعبة بفضل الـ overlay المدمج عبر اختصار لوحة المفاتيح.',
+      'feat5-title': 'إضافة جماعية',
+      'feat5-desc': 'حدد وثبت عدة manifests في إجراء واحد مع وضع التحديد المتعدد.',
+      'feat6-title': 'تثبيت مبسط',
+      'feat6-desc': 'مثبت مُوجَّه بنقرات قليلة — إنشاء اختصار سطح المكتب تلقائياً، تحديث تلقائي مدمج.',
+      'steps-label': 'كيفية الاستخدام',
+      'steps-title': 'جاهز في 3 خطوات',
+      'steps-desc': 'بدون إعداد معقد. ثبّت، شغّل، وانطلق.',
+      'step1-title': 'حمّل وثبّت',
+      'step1-desc': 'حمّل <code style="font-family:monospace;color:var(--accent-h);font-size:13px;">OsiProut-Manifester-Setup.exe</code> وشغّل المثبت — اختر مجلدك وستكون جاهزاً في ثوانٍ.',
+      'step2-title': 'افتح لعبة Steam',
+      'step2-desc': 'انتقل إلى صفحة اللعبة في عميل Steam أو في متصفحك. يكتشف Manifester تلقائياً AppID في الوقت الفعلي.',
+      'step3-title': 'ثبّت manifests',
+      'step3-desc': 'حدد manifests المطلوبة من القائمة وانقر <strong style="color:var(--tx-1)">تثبيت</strong>. يتم نسخ الملفات مباشرة إلى مجلد Steam.',
+      'cta-title': 'مستعد للبدء؟<br>حمّل <span class="accent">مجاناً</span>.',
+      'cta-desc': 'مثبت مُوجَّه، سريع، بدون تسجيل. متوافق مع Windows 10 و 11.',
+      'cta-btn': 'تحميل OsiProut Manifester',
+      'footer-copy': '© 2026 <span>OsiProut</span> — جميع الحقوق محفوظة'
+    },
+    tr: {
+      'page-title': 'OsiProut Manifester — İndir',
+      'page-desc': 'OsiProut Manifester İndir — Steam manifest yöneticisi. NSIS kurulum paketi, otomatik güncelleme dahil.',
+      'hero-sub': 'Steam Manifest Yöneticisi',
+      'hero-desc': 'Steam manifestlerinizi doğrudan kütüphanenizden yönetin, göz atın ve kurun. Otomatik Steam algılama, modern karanlık arayüz, dahili otomatik güncelleme ile rehberli kurulum.',
+      'btn-download': 'İndir',
+      'btn-download-meta': 'Windows x64 · ~90 MB · Kurulum',
+      'btn-features': 'Özellikler',
+      'req-win': 'Windows 10 / 11',
+      'req-portable': 'Rehberli kurulum',
+      'req-steam': 'Steam gerekli',
+      'req-free': 'Ücretsiz',
+      'feat-label': 'Özellikler',
+      'feat-title': 'İhtiyacınız olan her şey',
+      'feat-desc': 'Basitlik için tasarlanmış bir arayüzle Steam manifestlerinizi yönetmek için eksiksiz bir araç.',
+      'feat1-title': 'Otomatik algılama',
+      'feat1-desc': 'Chrome DevTools Protocol ile Steam veya tarayıcınızda açık oyunu gerçek zamanlı algılar — yapılandırma gerektirmez.',
+      'feat2-title': 'Tam kütüphane',
+      'feat2-desc': 'Binlerce manifest arasında göz atın, filtreleyin ve arayın. Ada, dala veya kurulum durumuna göre sıralayın.',
+      'feat3-title': 'Tek tıkla kurulum',
+      'feat3-desc': 'Manifest dosyalarını Steam libraryfolders klasörünüze doğrudan kopyalayın, anında görsel onay alın.',
+      'feat4-title': 'Steam Overlay',
+      'feat4-desc': 'Yerleşik overlay sayesinde oyundan çıkmadan manifestlerinize erişin, klavye kısayoluyla açın.',
+      'feat5-title': 'Toplu ekleme',
+      'feat5-desc': 'Çoklu seçim moduyla tek seferde birden fazla manifest seçin ve kurun.',
+      'feat6-title': 'Kolay Kurulum',
+      'feat6-desc': 'Birkaç tıklamayla rehberli kurulum — masaüstü kısayolu otomatik oluşturulur, otomatik güncelleme dahil.',
+      'steps-label': 'Nasıl kullanılır',
+      'steps-title': '3 adımda hazır',
+      'steps-desc': 'Karmaşık kurulum yok. Kurun, çalıştırın ve başlayın.',
+      'step1-title': 'İndir ve kur',
+      'step1-desc': '<code style="font-family:monospace;color:var(--accent-h);font-size:13px;">OsiProut-Manifester-Setup.exe</code> indirin ve kurulum sihirbazını çalıştırın — klasörü seçin, saniyeler içinde hazır.',
+      'step2-title': 'Bir Steam oyunu açın',
+      'step2-desc': 'Steam istemcisinde veya tarayıcınızda oyun sayfasına gidin. Manifester, AppID\'yi gerçek zamanlı otomatik algılar.',
+      'step3-title': 'Manifestleri kurun',
+      'step3-desc': 'Listeden istediğiniz manifestleri seçin ve <strong style="color:var(--tx-1)">Kur</strong>\'a tıklayın. Dosyalar doğrudan Steam dizinine kopyalanır.',
+      'cta-title': 'Başlamaya hazır mısınız?<br><span class="accent">Ücretsiz</span> indirin.',
+      'cta-desc': 'Rehberli kurulum, hızlı, kayıt gerektirmez. Windows 10 ve 11 ile uyumlu.',
+      'cta-btn': 'OsiProut Manifester İndir',
+      'footer-copy': '© 2026 <span>OsiProut</span> — Tüm hakları saklıdır'
+    }
+  };
+
+  // ── Detect language ──
+  const STORAGE_KEY = 'osiprout-lang';
+
+  function detectLang() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved && T[saved]) return saved;
+    const nav = (navigator.language || navigator.userLanguage || 'fr').toLowerCase();
+    const short = nav.split('-')[0];
+    return T[short] ? short : 'fr';
+  }
+
+  // ── Apply translations ──
+  function applyLang(lang) {
+    const dict = T[lang] || T.fr;
+    document.getElementById('html-root').lang = lang;
+
+    // data-i18n → textContent
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[key] !== undefined) {
+        if (el.getAttribute('data-i18n-attr')) {
+          el.setAttribute(el.getAttribute('data-i18n-attr'), dict[key]);
+        } else {
+          el.textContent = dict[key];
+        }
+      }
+    });
+
+    // data-i18n-html → innerHTML (for elements with <span>, <br>, etc.)
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      const key = el.getAttribute('data-i18n-html');
+      if (dict[key] !== undefined) el.innerHTML = dict[key];
+    });
+
+    // Special: step descriptions with HTML inside
+    ['step1-desc', 'step2-desc', 'step3-desc'].forEach(key => {
+      const el = document.querySelector('[data-i18n="' + key + '"]');
+      if (el && dict[key] !== undefined) el.innerHTML = dict[key];
+    });
+
+    // Title
+    if (dict['page-title']) document.title = dict['page-title'];
+
+    // Update picker UI
+    const info = LANGS[lang] || LANGS.fr;
+    document.getElementById('lang-flag').textContent = info.flag;
+    document.querySelectorAll('.lang-option').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+
+    localStorage.setItem(STORAGE_KEY, lang);
+  }
+
+  // ── Build dropdown ──
+  function buildDropdown() {
+    const dd = document.getElementById('lang-dropdown');
+    dd.innerHTML = '';
+    Object.entries(LANGS).forEach(([code, info]) => {
+      const btn = document.createElement('button');
+      btn.className = 'lang-option';
+      btn.dataset.lang = code;
+      btn.innerHTML = '<span>' + info.flag + '</span> ' + info.label;
+      btn.addEventListener('click', () => {
+        applyLang(code);
+        dd.classList.remove('open');
+      });
+      dd.appendChild(btn);
+    });
+  }
+
+  // ── Toggle dropdown ──
+  document.getElementById('lang-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('lang-dropdown').classList.toggle('open');
+  });
+
+  document.addEventListener('click', () => {
+    document.getElementById('lang-dropdown').classList.remove('open');
+  });
+
+  // ── Init ──
+  buildDropdown();
+  applyLang(detectLang());
+
+}());
+</script>
+
+</body>
+</html>
