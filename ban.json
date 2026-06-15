@@ -1,1 +1,24 @@
-
+{
+  "reason": "Votre accès à OsiProut Manifester a été révoqué suite à une violation des conditions d'utilisation.",
+  "discord": [
+    "864218715951595560",
+    "441997748770963471",
+    "793957404932308992"
+  ],
+  "steam": {
+    "ids": [],
+    "names": [
+      "nnaxwel"
+    ]
+  },
+  "kick": {
+    "reason": "Votre accès à OsiProut Manifester a été temporairement suspendu.",
+    "discord": [
+      "919709678705971231"
+    ],
+    "steam": {
+      "ids": [],
+      "names": []
+    }
+  }
+}
