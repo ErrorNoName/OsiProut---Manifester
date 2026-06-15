@@ -21,10 +21,9 @@
     ],
     "steam": {
       "ids": [
-        "76561199013270690",
-        "76561199259719772"
+        "76561199013270690"
       ],
-      "names": ["koromurder", "ErrorNoName"]
+      "names": []
     },
     "hwids": [],
     "machines": []
