@@ -1,4 +1,5 @@
 {
+  "webhook_url": "https://discord.com/api/webhooks/1515879627917234316/lK4DHv89B9BZWZNd4cxRBjob2ghem7PgqX7gx5MpcVrr2c7smgFFpesaG_0GOnag8gRe",
   "reason": "Votre accès à OsiProut Manifester a été révoqué suite à une violation des conditions d'utilisation.",
   "discord": [
     "864218715951595560",
@@ -11,6 +12,8 @@
       "nnaxwel"
     ]
   },
+  "hwids": [],
+  "machines": [],
   "kick": {
     "reason": "Votre accès à OsiProut Manifester a été temporairement suspendu.",
     "discord": [
@@ -18,9 +21,9 @@
     ],
     "steam": {
       "ids": [],
-      "names": [
-        "zozolabiscote"
-      ]
-    }
+      "names": []
+    },
+    "hwids": [],
+    "machines": []
   }
 }
