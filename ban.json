@@ -16,9 +16,7 @@
   "machines": [],
   "kick": {
     "reason": "Votre accès à OsiProut Manifester a été temporairement suspendu.",
-    "discord": [
-      "919709678705971231"
-    ],
+    "discord": [],
     "steam": {
       "ids": [],
       "names": []
